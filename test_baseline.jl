@@ -53,7 +53,7 @@ nthreads = 1
     end
     
     println("Finished loading args")
-fstt = "matpower/$(dataset_name)/2017-01-01"
+fstt = "matpower_subhour/$(dataset_name)/2017-01-01"
 
 println(fstt)
 # assume the instance is given as a 120h problem
@@ -77,8 +77,8 @@ total_time = @elapsed begin
         solution = UnitCommitment.optimize!(
         instance,
         TimeDecomposition(
-            time_window = 6, 
-            time_increment = 6,  
+            time_window = 24, 
+            time_increment = 24,  
             inner_method = XavQiuWanThi2019.Method(),
             formulation = Formulation(pwl_costs=Gar1962.PwlCosts()),
         ),

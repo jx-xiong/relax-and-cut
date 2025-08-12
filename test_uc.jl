@@ -57,7 +57,7 @@ function main()
     
     println("Finished loading args")
 
-    fstt = "matpower/$(dataset_name)/2017-01-01"
+    fstt = "matpower_subhour/$(dataset_name)/2017-01-01"
     ori_is = UnitCommitment.read_benchmark(fstt,)
 
 
@@ -66,6 +66,7 @@ function main()
         instance=ori_is,
         optimizer=Gurobi.Optimizer,
     )
+    @info "Time window: $(ori_model1[:instance].time)"
     JuMP.set_optimizer_attribute(ori_model1, "OutputFlag", 0)
     JuMP.set_optimizer_attribute(ori_model1, "Threads", nthreads)
 

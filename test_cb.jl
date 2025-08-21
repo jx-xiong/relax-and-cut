@@ -117,8 +117,10 @@ function main()
 
     println("Finished loading args")
 
-    fstt = "matpower_subhour/$(dataset_name)/2017-01-01"
+    fstt = "matpower/$(dataset_name)/2017-01-01"
     ori_is = UnitCommitment.read_benchmark(fstt,)
+    run(`python dataset_transformer.py --dataset $(dataset_name)`, wait=true)
+    fstt = "matpower_subhour/$(dataset_name)/2017-01-01"
     instance = ucRH.read_dir(fstt,)
     instance1 = ucRH.read_dir(fstt, )
     @info "Finished loading instance"

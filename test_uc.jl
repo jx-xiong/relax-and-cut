@@ -67,7 +67,7 @@ function main()
         optimizer=Gurobi.Optimizer,
     )
     @info "Time window: $(ori_model1[:instance].time)"
-    JuMP.set_optimizer_attribute(ori_model1, "OutputFlag", 0)
+    JuMP.set_optimizer_attribute(ori_model1, "OutputFlag", 1)
     JuMP.set_optimizer_attribute(ori_model1, "Threads", nthreads)
 
     total_time = @elapsed begin 

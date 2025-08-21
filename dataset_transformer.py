@@ -6,6 +6,9 @@ from typing import Any, Dict, List, Union, Optional, Iterable
 Number = Union[int, float]
 
 
+# CHANGE THIS BASE_DIR TO YOUR ACTUAL INSTANCE DIRECTORY
+BASE_DIR = "/home/jxxiong/.julia/packages/UnitCommitment/nnguY/instances"
+
 class PowerSystemDatasetTransformer:
     """
     电力系统 JSON 数据集转换器（默认优先处理 .json.gz，输出也压缩为 .json.gz）。
@@ -339,9 +342,9 @@ if __name__ == "__main__":
     
     # parent_dir = ""
     instance_name = args.dataset
-    print(f"==================={instance_name}===================")
-    src = f"/home/jxxiong/.julia/packages/UnitCommitment/nnguY/instances/matpower/{instance_name}"
-    dst = f"/home/jxxiong/.julia/packages/UnitCommitment/nnguY/instances/matpower_subhour/{instance_name}"
+    
+    src = f"{BASE_DIR}/matpower/{instance_name}"
+    dst = f"{BASE_DIR}/matpower_subhour/{instance_name}"
 
     PowerSystemDatasetTransformer.transform_folder(
         src_dir=src,

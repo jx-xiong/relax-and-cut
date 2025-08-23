@@ -1,0 +1,37 @@
+==========Running script on instance: 2025-08-22 15:02:37, threads: 1, nThreads: 1 ==========
+case1354pegase baseline_time_decompos 71.256975668 1.6462039091201674e7 feasibility_false
+case2737sop baseline_time_decompos 63.389373466 9.140053033888342e6 feasibility_true
+case2736sp baseline_time_decompos 80.102309871 1.0026379002471616e7 feasibility_true
+case1888rte baseline_time_decompos 204.736067795 6.145639046156741e7 feasibility_true
+case2383wp baseline_time_decompos 80.354123173 3.4166793416143216e7 feasibility_true
+case1951rte baseline_time_decompos 117.770216025 2.760850788208112e7 feasibility_true
+case2746wop baseline_time_decompos 0.0 0.0 feasibility_false
+case2746wp baseline_time_decompos 0.0 0.0 feasibility_false
+case3120sp baseline_time_decompos 206.219015244 1.2382888507634323e7 feasibility_false
+case3012wp baseline_time_decompos 114.508980974 1.2629455226139864e7 feasibility_true
+case2869pegase baseline_time_decompos 486.159173196 5.8291418546358906e7 feasibility_true
+case2848rte baseline_time_decompos 518.770544761 3.59105712304693e7 feasibility_true
+case3375wp baseline_time_decompos 358.393814531 1.738488857468402e7 feasibility_true
+case2868rte baseline_time_decompos 369.681877621 2.5548356324139968e7 feasibility_true
+case6468rte baseline_time_decompos 2328.543168786 5.891042925286492e7 feasibility_true
+==========Running script on instance: 2025-08-22 17:26:11, threads: 1, nThreads: 1 ==========
+case1354pegase baseline_time_decompos 57.537610968 1.6443754549670007e7 feasibility_true
+case2737sop baseline_time_decompos 50.836107842 9.016788041376086e6 feasibility_true
+case2736sp baseline_time_decompos 62.566365369 1.0038393373198379e7 feasibility_true
+case1888rte baseline_time_decompos 244.579926877 6.145872762035436e7 feasibility_true
+case2383wp baseline_time_decompos 72.315046431 3.3870788722246535e7 feasibility_true
+case1951rte baseline_time_decompos 127.631574921 2.760682174722572e7 feasibility_true
+case2746wop baseline_time_decompos 0.0 0.0 feasibility_false
+case2746wp baseline_time_decompos 53.714605984 1.018964540077065e7 feasibility_true
+case3120sp baseline_time_decompos 191.682263513 1.2405305230170945e7 feasibility_true
+case3012wp baseline_time_decompos 102.146807268 1.2653540480653644e7 feasibility_true
+case2869pegase baseline_time_decompos 656.836112303 5.825420728609493e7 feasibility_true
+case2848rte baseline_time_decompos 553.871537748 3.589652009021991e7 feasibility_true
+case3375wp baseline_time_decompos 322.387779326 1.744780957670102e7 feasibility_true
+case2868rte baseline_time_decompos 330.249299258 2.5577639083220467e7 feasibility_true
+case6468rte baseline_time_decompos 2085.528169003 5.8864119511446655e7 feasibility_true
+case6470rte baseline_time_decompos 8566.389685471 7.424255044998486e7 feasibility_true
+case6495rte baseline_time_decompos 2574.413224661 5.6614254256338246e7 feasibility_true
+case6515rte baseline_time_decompos 1960.555058587 5.7785317740933776e7 feasibility_false
+case13659pegase baseline_time_decompos 6846.461053316 2.732781688245406e8 feasibility_true
+case9241pegase baseline_time_decompos 0.0 0.0 feasibility_false

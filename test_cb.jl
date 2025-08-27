@@ -34,7 +34,7 @@ function main()
     dataset_name = "case89pegase"
 
     # model parameters
-    gap = 1e-3
+    gap = 1e-2
     sub_gap = 1e-2
     nthreads = 1 # nthreads: for Gurobi, threads for julia
     time_limit = 3600
@@ -430,7 +430,7 @@ function main()
             # fixing power: TODO
         end
 
-
+        # count the time for milp and solution query
         milp_time = @elapsed begin
             if decom_no_cb
                 ucRH.optimize!(ori_model, nStart=1, nEnd=net_tw_ori)
@@ -438,6 +438,8 @@ function main()
                 JuMP.optimize!(ori_model)
             end
         end
+
+        printstyled("Finished milp at last window :::  time:$(milp_time)\n"; color=:blue)
 
         sol_que_time = @elapsed begin
             solution_starting = ucRH.solution(ori_model)

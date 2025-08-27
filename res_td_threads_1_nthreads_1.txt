@@ -1,20 +1,4 @@
-==========Running script on instance: 2025-08-22 15:02:37, threads: 1, nThreads: 1 ==========
-case1354pegase baseline_time_decompos 71.256975668 1.6462039091201674e7 feasibility_false
-case2737sop baseline_time_decompos 63.389373466 9.140053033888342e6 feasibility_true
-case2736sp baseline_time_decompos 80.102309871 1.0026379002471616e7 feasibility_true
-case1888rte baseline_time_decompos 204.736067795 6.145639046156741e7 feasibility_true
-case2383wp baseline_time_decompos 80.354123173 3.4166793416143216e7 feasibility_true
-case1951rte baseline_time_decompos 117.770216025 2.760850788208112e7 feasibility_true
-case2746wop baseline_time_decompos 0.0 0.0 feasibility_false
-case2746wp baseline_time_decompos 0.0 0.0 feasibility_false
-case3120sp baseline_time_decompos 206.219015244 1.2382888507634323e7 feasibility_false
-case3012wp baseline_time_decompos 114.508980974 1.2629455226139864e7 feasibility_true
-case2869pegase baseline_time_decompos 486.159173196 5.8291418546358906e7 feasibility_true
-case2848rte baseline_time_decompos 518.770544761 3.59105712304693e7 feasibility_true
-case3375wp baseline_time_decompos 358.393814531 1.738488857468402e7 feasibility_true
-case2868rte baseline_time_decompos 369.681877621 2.5548356324139968e7 feasibility_true
-case6468rte baseline_time_decompos 2328.543168786 5.891042925286492e7 feasibility_true
-==========Running script on instance: 2025-08-22 17:26:11, threads: 1, nThreads: 1 ==========
+####################
 case1354pegase baseline_time_decompos 57.537610968 1.6443754549670007e7 feasibility_true
 case2737sop baseline_time_decompos 50.836107842 9.016788041376086e6 feasibility_true
 case2736sp baseline_time_decompos 62.566365369 1.0038393373198379e7 feasibility_true

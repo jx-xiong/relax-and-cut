@@ -1,4 +1,4 @@
-==========Running script on instance: 2025-08-23 01:27:22, threads: 1, nThreads: 1 ==========
+####################
 case1354pegase start_12_12 115.509918138 1.605470046025207e7 feasible_false
 case1354pegase improve_12_0_12 32.527456314000005 1.6025018793455401e7 feasible_true
 case1354pegase rh_12_0_12 148.037374452 1.6025018793455401e7 feasible_true
@@ -20,6 +20,9 @@ case1951rte rh_12_0_12 259.942690044 2.7649269916698903e7 feasible_true
 case2746wop start_12_12 93.801109886 8.969206347942464e6 feasible_false
 case2746wop improve_12_0_12 117.047550778 8.983561367261004e6 feasible_true
 case2746wop rh_12_0_12 210.84866066400002 8.983561367261004e6 feasible_true
+case2746wp start_12_12 0 0 feasible_false
+case2746wp improve_12_0_12 0 0 feasible_false
+case2746wp rh_12_0_12 0 0 feasible_false
 case3120sp start_12_12 210.74618244299998 1.2247372552300412e7 feasible_true
 case3120sp improve_12_0_12 147.54794803800002 1.2246422356098749e7 feasible_true
 case3120sp rh_12_0_12 358.294130481 1.2246422356098749e7 feasible_true
@@ -50,3 +53,9 @@ case6495rte rh_12_0_12 3575.299418914 5.69270165659958e7 feasible_true
 case6515rte start_12_12 3474.90560792 5.7767857861715496e7 feasible_false
 case6515rte improve_12_0_12 883.999865233 5.843707467331311e7 feasible_true
 case6515rte rh_12_0_12 4358.905473153 5.843707467331311e7 feasible_true
+case13659pegase start_12_12 13462.604250989001 2.706964473243466e8 feasible_false
+case13659pegase improve_12_0_12 2070.071388632 2.7069644732434666e8 feasible_false
+case13659pegase rh_12_0_12 15532.675639621 2.7069644732434666e8 feasible_false
+case9241pegase start_12_12 0 0 feasible_false
+case9241pegase improve_12_0_12 0 0 feasible_false
+case9241pegase rh_12_0_12 0 0 feasible_false

@@ -125,22 +125,6 @@ function main()
     instance1 = ucRH.read_dir(fstt, )
     @info "Finished loading instance"
 
-
-    # # check number of category
-    # S = 0
-    # delay_max = 0
-    # for g in instance.scenarios[1].thermal_units
-    #     S = max(S, length(g.startup_categories))
-    #     for s in g.startup_categories
-    #         delay_max = max(delay_max, s.delay)
-    #     end
-    # end
-
-    # open("startup_categories.txt", "a") do file
-    #     println(file, "$(dataset_name) category_$(S) delay_$(delay_max)")
-    # end
-    # return
-
     if solve_ori
         ori_model2 = UnitCommitment.build_model(
             instance=ori_is,
@@ -299,6 +283,8 @@ function main()
         formulation=Formulation(pwl_costs=Gar1962.PwlCosts()) # use simple pwl_costs
     )
 
+    total_cuts = 0
+
     function my_callback_function(cb_data)
         status = callback_node_status(cb_data, model)
         if status == MOI.CALLBACK_NODE_STATUS_FRACTIONAL
@@ -310,7 +296,7 @@ function main()
             return
         end
         # check violation and add cuts
-
+        vio_count = 0
         violations = []
         find_time = @elapsed begin
             for sc in model[:instance].scenarios
@@ -326,8 +312,13 @@ function main()
                         cb_data=cb_data
                     ),
                 )
+                vio_count += length(violations[end])
             end
         end
+
+        @info "Adding $(vio_count) cuts in total"
+        printstyled("Adding $(vio_count) cuts in total\n"; color=:red)
+        total_cuts += vio_count
 
         violations_found = false
         for v in violations
@@ -393,8 +384,6 @@ function main()
                     end
                     open(res_file_name,"a") do file
                         println(file,"$(dataset_name) start_$(nInt)_$(stepsize) 0 0 feasible_false")
-                        println(file,"$(dataset_name) improve_$(nInt)_$(type_imp)_$(stepsize) 0 0 feasible_false")
-                        println(file,"$(dataset_name) rh_$(nInt)_$(type_imp)_$(stepsize) 0 0 feasible_false")
                     end
                     return
                 end
@@ -418,6 +407,7 @@ function main()
         is_on_ts = model[:is_on_ts]
         switch_on_ts = model[:switch_on_ts]
         switch_off_ts = model[:switch_off_ts]
+        startup_ts = model[:startup_ts]
         
         # save is_on_ts to file
         for g in instance.scenarios[1].thermal_units
@@ -425,6 +415,9 @@ function main()
                 JuMP.fix(ori_model[:is_on][g.name, t], is_on_ts[g.name, t], force=true)
                 JuMP.fix(ori_model[:switch_on][g.name, t], switch_on_ts[g.name, t], force=true)
                 JuMP.fix(ori_model[:switch_off][g.name, t], switch_off_ts[g.name, t], force=true)
+                # for s in 1:length(g.startup_categories)
+                #     JuMP.fix(ori_model[:startup][g.name, t, s], startup_ts[g.name, t, s], force=true)
+                # end
             end
 
             # fixing power: TODO
@@ -446,43 +439,16 @@ function main()
         end
         new_obj = objective_value(ori_model)
 
-        for g in instance.scenarios[1].thermal_units
-            for t in iteration*stepsize+1:instance.time
-                is_on_ts[g.name, t] = value(ori_model[:is_on][g.name, t])
-                switch_on_ts[g.name, t] = value(ori_model[:switch_on][g.name, t])
-                switch_off_ts[g.name, t] = value(ori_model[:switch_off][g.name, t])
-            end
-        end
-
-
-        for g in instance.scenarios[1].thermal_units
-            for t in 1:instance.time
-                JuMP.fix(ori_model[:is_on][g.name, t], is_on_ts[g.name, t], force=true)
-                JuMP.fix(ori_model[:switch_on][g.name, t], switch_on_ts[g.name, t], force=true)
-                JuMP.fix(ori_model[:switch_off][g.name, t], switch_off_ts[g.name, t], force=true)
-            end
-
-            # fixing power: TODO
-        end
-
-
         # write the model to lp
         # JuMP.write_to_file(ori_model, "$(dataset_name)_last.lp")
         println("Finished milp at last window :::  time:$(milp_time)")        
     end
     
-    printstyled("Finished construction RH, Start improving\n"; color=:red)
+    printstyled("Total cuts added: $(total_cuts)\n"; color=:red)
+
     sol_feas1 = ucRH.validate(instance1, solution_starting)
     # write the solution to json file
     ucRH.write("sol_starting_$(dataset_name).json", solution_starting)
-    # constructive_obj = new_obj
-    # println(sol_feas1)
-    # open("res_an.txt","a") do file
-    #     println(file,"$(dataset_name) start_$(nInt)_$(stepsize) $(total_time) $(constructive_obj) feasible_$(sol_feas1)")
-    # end
-    # return
-
-    # ############################# Start Improving ####################################
 
     constructive_obj = new_obj
 

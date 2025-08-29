@@ -357,24 +357,3 @@ if __name__ == "__main__":
         compress_output=not args.no_compress,
         gzip_compresslevel=args.compress_level
     )
-# if __name__ == "__main__":
-#     import argparse
-#     # root = os.path.dirname(os.path.abspath(__file__))
-#     # in_filefolder = os.path.join(root, 'in')
-#     # out_filefolder = os.path.join(root, 'out')
-    
-#     # instance_name = "case14"
-#     # add isntance as argument
-#     parser = argparse.ArgumentParser(description="Transform power system dataset.")
-#     parser.add_argument("--dataset", type=str, help="Instance name, e.g., case14")
-#     args = parser.parse_args()
-#     instance_name = args.dataset
-    
-    
-
-#     in_filefolder = f"/home/jxxiong/.julia/packages/UnitCommitment/nnguY/instances/matpower/{instance_name}"
-#     out_filefolder = f"/home/jxxiong/.julia/packages/UnitCommitment/nnguY/instances/matpower_subhour/{instance_name}"
-
-#     print(in_filefolder)
-#     print(out_filefolder)
-#     PowerSystemDatasetTransformer.transform_folder(src_dir=in_filefolder, dst_dir=out_filefolder)

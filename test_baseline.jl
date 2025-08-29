@@ -77,9 +77,11 @@ total_time = @elapsed begin
         solution = UnitCommitment.optimize!(
         instance,
         TimeDecomposition(
-            time_window = 24, 
-            time_increment = 24,  
-            inner_method = XavQiuWanThi2019.Method(),
+            time_window = 6, 
+            time_increment = 6,  
+            inner_method = UnitCommitment.XavQiuWanThi2019.Method(time_limit=3600.0, 
+                                                                gap_limit=1e-3, 
+                                                                two_phase_gap=true,),
             formulation = Formulation(pwl_costs=Gar1962.PwlCosts()),
         ),
         optimizer = Gurobi.Optimizer,

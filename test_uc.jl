@@ -71,7 +71,14 @@ function main()
     JuMP.set_optimizer_attribute(ori_model1, "Threads", nthreads)
 
     total_time = @elapsed begin 
-        UnitCommitment.optimize!(ori_model1)
+        
+        UnitCommitment.optimize!(ori_model1,
+            UnitCommitment.XavQiuWanThi2019.Method(time_limit=3600.0, 
+                    gap_limit=1e-2, 
+                    two_phase_gap=true,
+                    # max_violations_per_line=50000,
+                    # max_violations_per_period=50000,
+                    ))
     end
 
     constructive_obj = objective_value(ori_model1)

@@ -4,7 +4,6 @@ using ucRH
 
 using Gurobi
 using JuMP
-using Ipopt
 using JSON
 
 import ucRH:
@@ -119,7 +118,7 @@ function main()
 
     fstt = "matpower/$(dataset_name)/2017-01-01"
     ori_is = UnitCommitment.read_benchmark(fstt,)
-    run(`python dataset_transformer.py --dataset $(dataset_name)`, wait=true)
+    run(`python dataset_transformer.py --dataset $(dataset_name) --interpolate`, wait=true)
     fstt = "matpower_subhour/$(dataset_name)/2017-01-01"
     instance = ucRH.read_dir(fstt,)
     instance1 = ucRH.read_dir(fstt, )
@@ -358,7 +357,7 @@ function main()
     println("RH Model Created")
     @info "RH model created"
 
-
+    start_time = time()
     net_tw = instance.time
     offset = 0
     iteration = 0
@@ -373,6 +372,11 @@ function main()
 
             milp_time = @elapsed begin
                 try 
+                    if time_limit - (time() - start_time) < 1
+                        @warn "Time limit almost reached, stopping"
+                        # raise error
+                        error("Time limit almost reached, stopping")
+                    end
                     ucRH.run_rh_cb!(model, nInt, nCont, stepsize, offset)
                 catch e
                     println("Error: $(e)")

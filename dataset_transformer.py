@@ -27,11 +27,16 @@ class PowerSystemDatasetTransformer:
         - "Initial status (h)" ×4
       Buses:
         - "Load (MW)":
-            * 标量 == 0 -> 保持 0
-            * 标量 != 0 -> [v]*4
-            * 列表 -> 元素级复制 4 次
+            复制模式（默认）：
+              * 标量 == 0 -> 保持 0
+              * 标量 != 0 -> [v]*4
+              * 列表 -> 元素级复制 4 次（长度变为 4N）
+            插值模式（--interpolate）：
+              * 列表：先对相邻数据间插入 3 个线性点（长度 4N-3），再用最后两个点向外外推 3 点（总长 4N）
+              * 标量 == 0 -> 保持 0
+              * 标量 != 0 -> 退化为 [v]*4
       Reserves:
-        - "Amount (MW)" 同上规则（标量 0 保持 0）
+        - "Amount (MW)" 同上规则（复制或插值由 flag 控制）
 
     读取：
         - 支持 *.json.gz 与 *.json
@@ -46,7 +51,8 @@ class PowerSystemDatasetTransformer:
         - 可通过 compress_output=False / CLI 的 --no-compress 改为输出未压缩 .json
     """
 
-    REPLICATION_FACTOR = 4
+    REPLICATION_FACTOR = 4  # 子小时分辨率（4 倍）
+    EXTRAPOLATE_AFTER = REPLICATION_FACTOR - 1  # 插值后再向外补的点数（3）
 
     # ---- Key 常量 ----
     LOAD_KEY = "Load (MW)"
@@ -75,7 +81,8 @@ class PowerSystemDatasetTransformer:
         verbose: bool = True,
         compress_output: bool = True,
         encoding: str = "utf-8",
-        gzip_compresslevel: int = 5
+        gzip_compresslevel: int = 5,
+        interpolate: bool = False,
     ) -> None:
         """
         转换目录下文件。
@@ -92,6 +99,7 @@ class PowerSystemDatasetTransformer:
         compress_output : True 输出 .json.gz；False 输出普通 .json
         encoding : 文本编码
         gzip_compresslevel : gzip 压缩等级 0-9
+        interpolate : 是否对 Buses/Reserves 使用线性插值（默认 False 为直接复制）
         """
         src_path = Path(src_dir)
         dst_path = Path(dst_dir)
@@ -131,7 +139,7 @@ class PowerSystemDatasetTransformer:
                 continue
 
             try:
-                transformed = cls.transform_data(data)
+                transformed = cls.transform_data(data, interpolate_series=interpolate)
             except Exception as e:
                 print(f"[ERROR] 转换失败 {rel}: {e}")
                 continue
@@ -234,12 +242,12 @@ class PowerSystemDatasetTransformer:
     # ---------- 数据转换主入口 ----------
 
     @classmethod
-    def transform_data(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+    def transform_data(cls, data: Dict[str, Any], interpolate_series: bool = False) -> Dict[str, Any]:
         data = json.loads(json.dumps(data))  # 深拷贝
         cls._transform_parameters(data.get("Parameters"))
         cls._transform_generators(data.get("Generators"))
-        cls._transform_buses(data.get("Buses"))
-        cls._transform_reserves(data.get("Reserves"))
+        cls._transform_buses(data.get("Buses"), interpolate=interpolate_series)
+        cls._transform_reserves(data.get("Reserves"), interpolate=interpolate_series)
         return data
 
     # ---------- 各部分转换 ----------
@@ -276,22 +284,32 @@ class PowerSystemDatasetTransformer:
                 gen[cls.GEN_INITIAL_STATUS_KEY] *= 4
 
     @classmethod
-    def _transform_buses(cls, buses: Optional[Dict[str, Any]]) -> None:
+    def _transform_buses(cls, buses: Optional[Dict[str, Any]], interpolate: bool = False) -> None:
         if not isinstance(buses, dict):
             return
         for bus in buses.values():
             if isinstance(bus, dict) and cls.LOAD_KEY in bus:
-                bus[cls.LOAD_KEY] = cls._replicate_series(bus[cls.LOAD_KEY], cls.REPLICATION_FACTOR)
+                series = bus[cls.LOAD_KEY]
+                if interpolate:
+                    bus[cls.LOAD_KEY] = cls._interpolate_or_replicate_series(
+                        series, replication=cls.REPLICATION_FACTOR, extend=cls.EXTRAPOLATE_AFTER
+                    )
+                else:
+                    bus[cls.LOAD_KEY] = cls._replicate_series(series, cls.REPLICATION_FACTOR)
 
     @classmethod
-    def _transform_reserves(cls, reserves: Optional[Dict[str, Any]]) -> None:
+    def _transform_reserves(cls, reserves: Optional[Dict[str, Any]], interpolate: bool = False) -> None:
         if not isinstance(reserves, dict):
             return
         for reserve in reserves.values():
             if isinstance(reserve, dict) and cls.RESERVE_AMOUNT_KEY in reserve:
-                reserve[cls.RESERVE_AMOUNT_KEY] = cls._replicate_series(
-                    reserve[cls.RESERVE_AMOUNT_KEY], cls.REPLICATION_FACTOR
-                )
+                series = reserve[cls.RESERVE_AMOUNT_KEY]
+                if interpolate:
+                    reserve[cls.RESERVE_AMOUNT_KEY] = cls._interpolate_or_replicate_series(
+                        series, replication=cls.REPLICATION_FACTOR, extend=cls.EXTRAPOLATE_AFTER
+                    )
+                else:
+                    reserve[cls.RESERVE_AMOUNT_KEY] = cls._replicate_series(series, cls.REPLICATION_FACTOR)
 
     # ---------- 工具函数 ----------
 
@@ -322,6 +340,49 @@ class PowerSystemDatasetTransformer:
             return series
         return [series] * replication
 
+    @classmethod
+    def _interpolate_or_replicate_series(cls, series: Any, replication: int, extend: int) -> Any:
+
+        if not isinstance(series, list):
+            if isinstance(series, (int, float)):
+                if series == 0:
+                    return series
+                return [series] * replication
+            return series
+
+        n = len(series)
+        if n == 0:
+            return series
+        if n == 1:
+            v = series[0]
+            if isinstance(v, (int, float)):
+                return [v] * replication
+            return series * replication
+
+        out: List[Number] = []
+        for i in range(n - 1):
+            a = series[i]
+            b = series[i + 1]
+            if not (isinstance(a, (int, float)) and isinstance(b, (int, float))):
+                out.extend([a] * replication)
+                continue
+            step = (b - a) / replication
+            for k in range(replication):
+                out.append(a + step * k)
+        out.append(series[-1])
+
+        if len(out) >= 2 and extend > 0:
+            last = out[-1]
+            prev = out[-2]
+            if isinstance(last, (int, float)) and isinstance(prev, (int, float)):
+                d = last - prev
+                for _ in range(extend):
+                    last = last + d
+                    out.append(last)
+            else:
+                pass
+
+        return out
 
 if __name__ == "__main__":
     import argparse
@@ -337,6 +398,11 @@ if __name__ == "__main__":
     parser.add_argument("--no-compress", action="store_true", help="输出不压缩（写出纯 .json）")
     parser.add_argument("--quiet", action="store_true", help="安静模式")
     parser.add_argument("--compress-level", type=int, default=5, help="gzip 压缩等级 0-9 (默认 5)")
+    parser.add_argument(
+        "--interpolate",
+        action="store_true",
+        help="对 Buses/Reserves 使用线性插值（相邻间插入3点，末端再外推3点）；默认为直接复制。"
+    )
 
     args = parser.parse_args()
     
@@ -345,7 +411,6 @@ if __name__ == "__main__":
     
     src = f"{BASE_DIR}/matpower/{instance_name}"
     dst = f"{BASE_DIR}/matpower_subhour/{instance_name}"
-
     PowerSystemDatasetTransformer.transform_folder(
         src_dir=src,
         dst_dir=dst,
@@ -355,5 +420,6 @@ if __name__ == "__main__":
         recursive=args.recursive,
         verbose=not args.quiet,
         compress_output=not args.no_compress,
-        gzip_compresslevel=args.compress_level
+        gzip_compresslevel=args.compress_level,
+        interpolate=args.interpolate,
     )

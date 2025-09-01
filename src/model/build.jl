@@ -89,6 +89,7 @@ function build_model(;
         _init(model, :switch_on_ts)
         _init(model, :switch_off_ts)
         _init(model, :startup_ts)
+        _init(model, :prod_above_ts)
 
         _init(model, :initial_total_reserve)
         _init(model, :true_initial_status)
@@ -278,7 +279,6 @@ function update_model(
         end
     end
 
-
     # update load for each bus
     bus_load = model[:bus_load]
     for b in instance.scenarios[1].buses 
@@ -286,54 +286,6 @@ function update_model(
             fix(bus_load[b.name, t], b.load[offset+t]; force = true)
         end
     end
-
-    # for g in instance.scenarios[1].thermal_units
-    #     spinning_reserves = [r for r in g.reserves if r.type == "spinning"]
-    #     if !isempty(spinning_reserves)
-    #         for t in 1:model[:nsize]
-    #             if offset == 0 && t == 1
-    #                 fix(total_reserve[instance.scenarios[1].name, g.name, t], -100000; force=true)
-    #             else
-    #                 total_reserve[instance.scenarios[1].name, g.name, t] = sum(model[:reserve][instance.scenarios[1].name, r.name, g.name, t] for r in spinning_reserves)
-    #             end
-    #         end
-    #     else
-    #         for t in 1:model[:nsize]
-    #             if offset == 0 && t == 1
-    #                 fix(total_reserve[instance.scenarios[1].name, g.name, t], -100000; force=true)
-    #             else
-    #                 fix(total_reserve[instance.scenarios[1].name, g.name, t], 0.0; force= true)
-    #             end
-    #         end
-    #     end
-    # end
-
-    # for g in instance.scenarios[1].thermal_units
-    #     spinning_reserves = [r for r in g.reserves if r.type == "spinning"]
-    #     if !isempty(spinning_reserves)
-    #         for t in 1:model[:nsize]
-    #             if offset == 0 && t == 1
-    #                 total_reserve[instance.scenarios[1].name, g.name, t] = sum(model[:reserve][instance.scenarios[1].name, r.name, g.name, t] for r in spinning_reserves)
-    #                 # if g.initial_status < 0
-    #                 #     total_reserve[instance.scenarios[1].name, g.name, t] = -100000000
-    #                 # end
-    #             else
-    #                 total_reserve[instance.scenarios[1].name, g.name, t] = sum(model[:reserve][instance.scenarios[1].name, r.name, g.name, t] for r in spinning_reserves)
-    #             end
-    #         end
-    #     else
-    #         for t in 1:model[:nsize]
-    #             if offset == 0 && t == 1
-    #                 total_reserve[instance.scenarios[1].name, g.name, t] = 0.0
-    #                 # if g.initial_status < 0
-    #                 #     total_reserve[instance.scenarios[1].name, g.name, t] = -100000000
-    #                 # end
-    #             else
-    #                 total_reserve[instance.scenarios[1].name, g.name, t] = 0.0
-    #             end
-    #         end
-    #     end 
-    # end
 
     return not_unfix_is_on, not_unfix_switch_on, not_unfix_switch_off
 end
@@ -387,74 +339,7 @@ function clean_model(
             end
         end
     end
-
-    # total_reserve = model[:total_reserve]
-    # for g in instance.scenarios[1].thermal_units
-    #     if is_fixed(total_reserve[instance.scenarios[1].name, g.name, 0])
-    #         unfix(total_reserve[instance.scenarios[1].name, g.name, 0])
-    #     end
-    # end
 end
-
-
-
-
-# function update_model(;
-#     instance::ucRHInstance,
-#     model::JuMP.Model
-# )
-#     # delete initial minup mindown constraints from the model
-#     sc = instance.scenarios[1]
-#     for g in sc.thermal_units
-#         constr_name = "eq_min_downtime_$(g.name)_0"
-#         if constraint_by_name(model, constr_name) !== nothing
-#             @info "delete eq_min_downtime_$(g.name)_0"
-#             delete(model, model[:eq_min_downtime][g.name, 0])
-#         end
-#         constr_name = "eq_min_uptime_$(g.name)_0"
-#         if constraint_by_name(model, constr_name) !== nothing
-#             @info "delete eq_min_uptime_$(g.name)_0"
-#             delete(model, model[:eq_min_uptime][g.name, 0])
-#         end
-#         constr_name = "eq_shutdown_limit_$(sc.name)_$(g.name)_0"
-#         if constraint_by_name(model, constr_name) !== nothing
-#             @info "delete eq_shutdown_limit_$(sc.name)_$(g.name)_0"
-#             delete(model, model[:eq_shutdown_limit][sc.name, g.name, 0])
-#         end
-
-#         # unregister noneed, add constraints by name
-#         # unregister(model, model[:eq_min_downtime][g.name, 0])
-#         # undegister(model, model[:eq_min_uptime][g.name, 0])
-
-#         # add new initial minup mindown constraints
-#         if g.initial_status > 0
-#             model[:eq_min_uptime][g.name, 0] = @constraint(
-#                 model,
-#                 sum(
-#                     model[:switch_off][g.name, i] for
-#                     i in 1:(g.min_uptime-g.initial_status) if i <= model[:nsize]
-#                 ) == 0,
-#                 base_name="eq_min_uptime_$(g.name)_0"
-#             )
-#         else
-#             model[:eq_min_downtime][g.name, 0] = @constraint(
-#                 model,
-#                 sum(
-#                     model[:switch_on][g.name, i] for
-#                     i in 1:(g.min_downtime+g.initial_status) if i <= model[:nsize]
-#                 ) == 0,
-#                 base_name="eq_min_downtime_$(g.name)_0"
-#             )
-#         end
-
-#         if g.initial_power > g.shutdown_limit
-#             model[:eq_shutdown_limit][sc.name, g.name, 0] =
-#                 @constraint(model, model[:switch_off][g.name, 1] <= 0, 
-#                     base_name="eq_shutdown_limit_$(sc.name)_$(g.name)_0")
-#         end
-#     end
-# end
-
 
 function unupdate_model(;
     instance::ucRHInstance,
@@ -473,12 +358,6 @@ function unupdate_model(;
                 end
             end
             for t in nInt+1:nCont+nInt
-                # lb = lower_bound(is_on[g.name,t])
-                # ub = upper_bound(is_on[g.name,t])
-                # @info "$(g.name) $(lb) $(ub)"
-                # JuMP.unfix(is_on[g.name, t])
-                # set_lower_bound(is_on[g.name,t],0.0)
-                # set_upper_bound(is_on[g.name,t],1.0)
                 if JuMP.is_fixed(is_on[g.name, t])
                     JuMP.unfix(is_on[g.name, t])
                     set_lower_bound(is_on[g.name,t],0.0)

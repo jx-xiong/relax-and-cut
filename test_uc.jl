@@ -4,7 +4,6 @@ using ucRH
 
 using Gurobi
 using JuMP
-using Ipopt
 using JSON
 
 import ucRH:
@@ -74,7 +73,7 @@ function main()
         
         UnitCommitment.optimize!(ori_model1,
             UnitCommitment.XavQiuWanThi2019.Method(time_limit=3600.0, 
-                    gap_limit=1e-2, 
+                    gap_limit=1e-3, 
                     two_phase_gap=true,
                     # max_violations_per_line=50000,
                     # max_violations_per_period=50000,

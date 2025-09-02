@@ -36,7 +36,7 @@ function main()
     gap = 1e-3
     sub_gap = 1e-2
     nthreads = 1 # nthreads: for Gurobi, threads for julia
-    time_limit = 3600
+    time_limit = 10800
 
     # parsing arguments
     println("Checking args")
@@ -352,7 +352,7 @@ function main()
 
     JuMP.set_time_limit_sec(model, time_limit)
     JuMP.set_optimizer_attribute(model, "Threads", nthreads)
-    JuMP.set_optimizer_attribute(model, "OutputFlag", 0)
+    JuMP.set_optimizer_attribute(model, "OutputFlag", 1)
     JuMP.set_optimizer_attribute(model, "MIPGap", sub_gap)
     println("RH Model Created")
     @info "RH model created"
@@ -363,7 +363,7 @@ function main()
     iteration = 0
     update_time = 0
     total_time = @elapsed begin
-        while offset + nInt + nCont < net_tw # will solve the model with all integer in the end, 
+        while offset + nInt + nCont <= net_tw # will solve the model with all integer in the end, 
             printstyled("Current dealing with time window: $(offset+1) ~ $(offset+nInt)I + $(offset+nInt+1)~$(offset+nInt+nCont)C / $(net_tw)", "\n"; color=:blue)
             @info "Current dealing with time window: $(offset+1) ~ $(offset+nInt)I + $(offset+nInt+1)~$(offset+nInt+nCont)C / $(net_tw)"
             update_time += @elapsed begin 
@@ -465,7 +465,7 @@ function main()
         res_file_name = "res_an_no_cb_threads_$(K)_nthreads_$(nthreads).txt"
     end
     open(res_file_name,"a") do file
-        println(file,"$(dataset_name) start_$(nInt)_$(stepsize) $(total_time) $(constructive_obj) feasible_$(sol_feas1)")
+        println(file,"$(dataset_name) start_$(nInt)_$(nCont)_$(stepsize) $(total_time) $(constructive_obj) feasible_$(sol_feas1)")
     end
 end
 

@@ -23,37 +23,6 @@ function _add_transmission_line!(
     return
 end
 
-
-function _update_transmission_line!(
-    model::JuMP.Model,
-    sc::ucRHScenario,
-    nCont::Int,
-    nInt::Int,
-    offset::Int
-)::Nothing
-    # overflow = _init(model, :overflow)
-    overflow = model[:overflow]
-    t1 = 0
-    t2 = 0
-
-    for lm in sc.lines
-        for t in 1:nCont+nInt
-            section_time = @elapsed begin
-                zz = lm.flow_limit_penalty[t+offset] * sc.probability
-                add_to_expression!(
-                    model[:obj_overflow],
-                    # model[:obj],
-                    overflow[sc.name, lm.name, t],
-                    zz,
-                )
-            end
-            t1 += section_time
-        end
-    end
-    printstyled("--update one transmission line-- Time: $(t1)  --  for $(size(sc.lines)) lines  \n"; color=:red)
-    return
-end
-
 function _setup_transmission(
     formulation::ShiftFactorsFormulation,
     sc::ucRHScenario,
